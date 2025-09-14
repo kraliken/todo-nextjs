@@ -5,7 +5,8 @@ name: Deploy Next.js to Azure Web App
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
@@ -15,37 +16,39 @@ jobs:
       contents: read
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
         with:
-          node-version: 20
-          cache: npm
+          node-version: '22.x'
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Build Next.js (production)
-        env:
-          NODE_ENV: production
+      - name: Build Next.js app
         run: npm run build
 
-      - name: Prepare release artifacts
+      - name: Prepare deployment package
         run: |
-          mkdir -p release
-          cp -R .next release/.next
-          cp -R public release/public 2>/dev/null || true
-          [ -f next.config.js ] && cp next.config.js release/ || true
-          [ -f server.js ] && cp server.js release/ || true
-          cp package.json package-lock.json release/
+          mkdir deploy
+          cp -R .next deploy/
+          cp -R public deploy/
+          cp -R node_modules deploy/
+          cp -R styles deploy/ || true
+          cp package.json deploy/
+          cp next.config.js deploy/ || true
+          cp server.js deploy/
 
-      - name: Upload artifact
+      - name: Zip artifact for deployment
+        run: cd deploy && zip -r ../release.zip . && cd ..
+
+      - name: Upload artifact for deployment
         uses: actions/upload-artifact@v4
         with:
-          name: nextjs-release
-          path: release
+          name: node-app
+          path: release.zip
 
   deploy:
     runs-on: ubuntu-latest
@@ -55,22 +58,25 @@ jobs:
       contents: read
 
     steps:
-      - name: Download artifact
+      - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
-          name: nextjs-release
-          path: release
+          name: node-app
+
+      - name: Unzip artifact
+        run: unzip release.zip
 
       - name: Login to Azure
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_38094B7437AB4EAA86CC41C41735B70D }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_CC255DEC69F74D4B870C6DD3BD176C26 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICESUBSCRIPTIONID_4191902740064040892DE55C300BE39C }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_4191902740064040892DE55C300BE39C }}
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
-          app-name: todo-kraliken
-          slot-name: Production
-          package: release
+          app-name: 'todo-kraliken'
+          slot-name: 'Production'
+          package: .
+        
