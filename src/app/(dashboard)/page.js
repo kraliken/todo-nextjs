@@ -1,12 +1,15 @@
-export default function Home() {
+import PageHeader from "@/components/page/PageHeader";
+import TodoTable from "@/components/table/todo/TodoTable";
+import { getTodos } from "@/lib/actions/todo.actions";
+
+export default async function Home() {
+
+    const todos = await getTodos()
+
     return (
-        <div className="flex min-h-[calc(100vh-68px)] flex-col items-center text-center px-4">
-            <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-                feladatlista
-            </h1>
-            <p className="mt-4 text-lg text-muted-foreground">
-                táblázat
-            </p>
+        <div className="flex min-h-[calc(100vh-68px)] flex-col px-4 gap-4">
+            <PageHeader />
+            <TodoTable todos={todos} />
         </div>
     );
 }
