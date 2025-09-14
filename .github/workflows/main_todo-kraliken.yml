@@ -24,7 +24,7 @@ jobs:
           node-version: 20
           cache: npm
 
-      - name: Install deps
+      - name: Install dependencies
         run: npm ci
 
       - name: Build Next.js (production)
@@ -32,7 +32,6 @@ jobs:
           NODE_ENV: production
         run: npm run build
 
-      # Készítsünk minimális release csomagot
       - name: Prepare release artifacts
         run: |
           mkdir -p release
@@ -62,16 +61,16 @@ jobs:
           name: nextjs-release
           path: release
 
-      - name: Azure login (federated)
+      - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}          # <- használd a meglévő titkaidat
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_38094B7437AB4EAA86CC41C41735B70D }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_CC255DEC69F74D4B870C6DD3BD176C26 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICESUBSCRIPTIONID_4191902740064040892DE55C300BE39C }}
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
-          app-name: todo-kraliken                          # <- a Web App neve
+          app-name: todo-kraliken
           slot-name: Production
           package: release
