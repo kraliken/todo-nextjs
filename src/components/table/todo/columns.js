@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react"
+import ActionsCell from "./ActionCell";
 
 export const columns = [
     {
@@ -73,4 +74,8 @@ export const columns = [
             return <div className="text-left">{statusEnum[status] ?? status}</div>;
         }
     },
+    {
+        id: "actions",
+        cell: ({ row }) => <ActionsCell row={row} />
+    }
 ]

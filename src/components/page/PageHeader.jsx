@@ -9,9 +9,6 @@ const PageHeader = ({ title = "Feladatlista" }) => {
                     <h2>{title}</h2>
                 </CardTitle>
             </CardHeader>
-            {/* <CardContent className="w-full sm:flex-1 flex justify-end">
-
-            </CardContent> */}
         </Card>
     )
 }
